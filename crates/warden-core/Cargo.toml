@@ -1,0 +1,34 @@
+[package]
+name = "warden-core"
+version = "0.1.0"
+edition = "2021"
+description = "Warden antivirus scan engine"
+license = "MIT"
+
+[lib]
+name = "warden_core"
+path = "src/lib.rs"
+
+[[bin]]
+name = "warden-cli"
+path = "src/bin/warden-cli.rs"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+sha2 = "0.10"
+md-5 = "0.10"
+hex = "0.4"
+walkdir = "2"
+zip = { version = "2", default-features = false, features = ["deflate"] }
+aes-gcm = "0.10"
+rand = "0.8"
+regex = "1"
+memchr = "2"
+goblin = { version = "0.9", default-features = false, features = ["std", "pe32", "pe64"] }
+rayon = "1"
+chrono = { version = "0.4", features = ["serde"] }
+uuid = { version = "1", features = ["v4"] }
+ureq = "2"
+anyhow = "1"
+parking_lot = "0.12"

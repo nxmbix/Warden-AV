@@ -1,0 +1,8 @@
+[workspace]
+resolver = "2"
+members = ["crates/warden-core", "src-tauri"]
+
+[profile.release]
+codegen-units = 4
+strip = true
+opt-level = 3
