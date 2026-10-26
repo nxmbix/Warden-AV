@@ -61,6 +61,7 @@ pub fn restart(app: &AppHandle) {
 
 fn worker(app: AppHandle, rx: mpsc::Receiver<PathBuf>) {
     let mut pending: HashMap<PathBuf, Instant> = HashMap::new();
+    let mut recent: HashMap<PathBuf, Instant> = HashMap::new();
     loop {
         match rx.recv_timeout(Duration::from_millis(400)) {
             Ok(p) => {
@@ -76,8 +77,20 @@ fn worker(app: AppHandle, rx: mpsc::Receiver<PathBuf>) {
             .collect();
         for p in ready {
             pending.remove(&p);
-            handle(&app, &p);
+            if p.is_dir() {
+                // Files can land in a new folder before the watcher picks it up.
+                let now = Instant::now();
+                for e in walkdir::WalkDir::new(&p).max_depth(4).into_iter().flatten().take(2000) {
+                    if e.file_type().is_file() {
+                        pending.entry(e.into_path()).or_insert(now);
+                    }
+                }
+            } else if recent.get(&p).is_none_or(|t| t.elapsed() > Duration::from_secs(10)) {
+                handle(&app, &p);
+                recent.insert(p, Instant::now());
+            }
         }
+        recent.retain(|_, t| t.elapsed() < Duration::from_secs(10));
     }
 }
 
